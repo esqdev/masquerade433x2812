@@ -9,4 +9,6 @@ ESP8266 der als Webserver und als Signalgeber fungiert
 Arduino oder ATMegaXXX der die 433Mhz Signale empfängt, das ensprechende Programm aufruft und an die WS2812 sendet.
 
 ## WebApp
-HTML Webseite die mit Butto
+HTML Webseite die Buttons ausspielt
+- als include für das masterDevice.ino
+- als .html zum offline-testen
