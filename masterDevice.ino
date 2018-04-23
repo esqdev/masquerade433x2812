@@ -2,7 +2,7 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 
-#include "FlashTrigger.h"  //sets variable String html_page=...
+#include "webApp.h"  //sets variable String html_page=...
  
 ESP8266WebServer server(80);   
 
