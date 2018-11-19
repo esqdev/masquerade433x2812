@@ -67,23 +67,59 @@ void loop() {
   //Assign Program-Message to "triggerProgramId"
 
   if(myDeviceId == triggerDeviceId || 42 == triggerDeviceId){
-    if( 1 == triggerProgramId){show_color(255,   0,   0, 3000);} // Rot 3 Sek
-    if( 2 == triggerProgramId){show_color(  0, 255,   0, 5000);} // grün 5 Sek
-    if( 3 == triggerProgramId){show_color(  0,   0, 255, 1000);} // blau 1 Sek
-    if( 4 == triggerProgramId){show_color(255, 255,   0, 3000);} // gelb 3 Sek
-    if( 5 == triggerProgramId){show_color(255,   0, 255, 3000);} // lila 3 Sek
-    if( 6 == triggerProgramId){show_color(  0, 255, 255, 3000);} // türkis 3 Sek
-    if( 7 == triggerProgramId){show_color(255, 255, 255, 3000);} // weiss 3 Sek
-    if( 8 == triggerProgramId){show_color(255,   0,   0, 3000);} // Rot 3 Sek
-    if( 9 == triggerProgramId){show_color(255,   0,   0, 3000);} // Rot 3 Sek
-    if(10 == triggerProgramId){show_color(255,   0,   0, 3000);} // Rot 3 Sek
+    if( 1 == triggerProgramId){    show_color(255,   0,   0, 3000);} // Rot 3 Sek
+    if( 2 == triggerProgramId){    show_color(  0, 255,   0, 5000);} // grün 5 Sek
+    if( 3 == triggerProgramId){    show_color(  0,   0, 255, 1000);} // blau 1 Sek
+    if( 4 == triggerProgramId){    show_color(255, 255,   0, 3000);} // gelb 3 Sek
+    if( 5 == triggerProgramId){    show_color(255,   0, 255, 3000);} // lila 3 Sek
+    if( 6 == triggerProgramId){    show_color(  0, 255, 255, 3000);} // türkis 3 Sek
+    if( 7 == triggerProgramId){    show_color(255, 255, 255, 3000);} // weiss 3 Sek
+    if( 8 == triggerProgramId){    show_color(255,   0,   0, 3000);} // Rot 3 Sek
+    if( 9 == triggerProgramId){    show_color(255,   0,   0, 3000);} // Rot 3 Sek
+    if(10 == triggerProgramId){running_pixels(255,   0,   0,  100, 5);} // Running Rot 5 Pixel
 
-
-
-    all_off();
+    all_off(); //switch LEDs off for standby 
   } // device IF
 } //loop
 
+//#######################################
+
+//running pixels
+void running_pixels(uint16_t color_r, uint16_t color_g, uint16_t color_b, uint16_t duration, uint16_t running_pixels) {
+  uint16_t i;
+  color_r = adjust_brightness(color_r);
+  color_g = adjust_brightness(color_g);
+  color_b = adjust_brightness(color_b);
+  
+  for (i = 0; i < (2*NUM_LEDS + running_pixels); i++) {
+    
+    // led_strip_1 AN
+    if(i < NUM_LEDS){ 
+      led_strip_1.setPixelColor(NUM_LEDS - 1 - i, led_strip_1.Color(color_r, color_g, color_b));
+    }
+    
+    // led_strip_1 AUS
+    if(i >= running_pixels && i < NUM_LEDS + running_pixels){
+      led_strip_1.setPixelColor(NUM_LEDS - 1 - i + running_pixels, led_strip_1.Color(0, 0, 0));
+    }
+
+    // led_strip_2 AN
+    if(i >= NUM_LEDS && i < 2 * NUM_LEDS){ 
+      led_strip_2.setPixelColor(i - NUM_LEDS, led_strip_2.Color(color_r, color_g, color_b));
+    }
+    
+    // led_strip_2 AUS
+    if(i >= running_pixels + NUM_LEDS && i < 2*NUM_LEDS + running_pixels){
+      led_strip_2.setPixelColor(i - NUM_LEDS - running_pixels, led_strip_2.Color(0, 0, 0));
+    }
+ 
+    led_strip_1.show();
+    led_strip_2.show();
+    delay(duration);
+  
+  }
+
+}
 
 //#######################################
 
@@ -114,7 +150,7 @@ void all_off() {
   led_strip_2.show();
 }
 
-
+//#######################################
 uint16_t adjust_brightness(uint16_t c){
   c = (c * brightness) / 100;
   return c;
