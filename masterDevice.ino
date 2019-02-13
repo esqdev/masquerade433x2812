@@ -12,7 +12,7 @@
 IPAddress local_IP(192,168,11,11);
 IPAddress gateway(192,168,200,200);
 IPAddress subnet(255,255,255,0);
-
+int buttonState;
 
 RH_ASK driver(2000, D4, D3, D2); // ESP8266 or ESP32: do not use pin 11
  
@@ -48,13 +48,22 @@ void setup()
   server.on("/alle_rot_lauf.html",   [](){  execute(42, 10);});
   server.on("/alle_feuerwerk.html",  [](){  execute(42, 11);});
   server.on("/alle_fckoeln.html",    [](){  execute(42, 12);});
+  server.on("/alle_pegel2019.html",    [](){  execute(42, 13);});
   
+  server.on("/alle_dev14.html",    [](){  execute(42, 14);});
+  server.on("/alle_dev15.html",    [](){  execute(42, 15);});
+  server.on("/alle_dev16.html",    [](){  execute(42, 16);});
+  server.on("/alle_dev17.html",    [](){  execute(42, 17);});
+  server.on("/alle_dev18.html",    [](){  execute(42, 18);});
   
-  server.on("/zufall.html", [](){  execute(1, 1);});
-  server.on("/schlange.html",[](){ execute(42, 5);});
-  server.on("/bunt2.html",  [](){  execute(42, 6);});
-  server.on("/flash2.html",  [](){ execute(42, 9);});
-  server.on("/schlange2.html",[](){execute(42, 10);});
+  server.on("/ping_jan.html", [](){  execute(1, 3);});
+  server.on("/ping_jo.html", [](){  execute(2, 3);});
+  server.on("/ping_marc.html", [](){  execute(3, 3);});
+  server.on("/ping_max.html", [](){  execute(4, 3);});
+  server.on("/ping_niklas.html", [](){  execute(5, 3);});
+  server.on("/ping_niko.html", [](){  execute(6, 3);});
+  server.on("/ping_ulli.html", [](){  execute(7, 3);});
+  server.on("/ping_vince.html", [](){  execute(8, 3);});
    
   server.begin();               // Starte den Server
   Serial.println("HTTP Server gestartet");
@@ -63,6 +72,9 @@ void setup()
 void loop()
 {
   server.handleClient();
+
+  buttonState = digitalRead(D5);
+  if(buttonState == 0) {execute(42, 11);};
 }
 
 void execute(int clientID, int programID) {
@@ -72,11 +84,13 @@ void execute(int clientID, int programID) {
   
     driver.send((uint8_t*)message, sizeof(message));
     if (driver.waitPacketSent()) {
-      Serial.print("Code : ");
+      Serial.print("Device : ");
+      Serial.print(message[0]);
+      Serial.print(" / Code : ");
       Serial.println(message[1]);
 
     }
-server.send(200, "text/html", html_page);
+server.send(200, "text/html", forwarding_page);
 }
 
 void server_input_none() 
