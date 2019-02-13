@@ -39,7 +39,7 @@ Adafruit_NeoPixel led_strip_2 = Adafruit_NeoPixel(NUM_LEDS, DATA_LED2, NEO_GRB +
 
 //Variablen
 int myDeviceId;
-int myFavProgram = 12;
+int myFavProgram = 12; //8 = Kirmesbeleuchtung
 int triggerProgramId;
 int brightness = 5;
 const int maxProgramId = 12;
@@ -144,7 +144,7 @@ void loop() {
       show_color(255, 255, 255, 1000); // weiss
     }
     if ( 8 == triggerProgramId) {
-      kirmesbeleuchtung(150, 50, 4); // Kirmesbeleuchtung
+      kirmesbeleuchtung(150, 100, 4); // Kirmesbeleuchtung
     }
     if ( 9 == triggerProgramId) { // 3x blitzen
       show_color(255,   255,   255,   50); 
@@ -164,22 +164,22 @@ void loop() {
       show_color(  0,   0, 255, 50);
     }
     if (12 == triggerProgramId) { // fc chaser
-      running_pixels(255,   0,   0, 255,200,150,  100, 15, 5); 
+      running_pixels(255,   0,   0, 255,200,150,  100, 30, 5); 
     }
     if (13 == triggerProgramId) { // claim "pegel 2019" row 1
-      show_claim(claim_pegel_2019, 0,  0,255,255,  5000); 
+      show_claim(claim_pegel_2019,  0,255,255,  100, 10);
     }
-    if (14 == triggerProgramId) { // claim "pegel 2019" row 2
-      show_claim(claim_pegel_2019, 0,  0,255,255,  5000); 
+    if (14 == triggerProgramId) { // 
+      show_random_sleeves(20,   500); // Random Sleeves 
     }
-    if (15 == triggerProgramId) { // claim "pegel 2019" row 3
-      show_claim(claim_pegel_2019, 0,  0,255,255,  5000); 
+    if (15 == triggerProgramId) { // 
+      show_color(255,   0, 255, 1000); // lila 
     }
-    if (16 == triggerProgramId) { // claim "pegel 2019" row 4
-      show_claim(claim_pegel_2019, 0,  0,255,255,  5000); 
+    if (16 == triggerProgramId) { // 
+      show_color(255,   0, 255, 1000); // lila 
     }
-    if (17 == triggerProgramId) { // claim "pegel 2019" row 5
-      show_claim(claim_pegel_2019, 0,  0,255,255,  5000); 
+    if (17 == triggerProgramId) { // 
+      show_color(255,   0, 255, 1000); // lila 
     }
 
     all_off(); //switch LEDs off for standby
@@ -205,7 +205,7 @@ int read433() {
 //#######################################
 void kirmesbeleuchtung(uint16_t led_speed, uint16_t iterations, uint16_t space) {
 
-  int offset = 1;
+  int offset = space;
   for (int i = 0; i < iterations; i++) {
 
     for (int j = 0; j < NUM_LEDS; j++) {
@@ -228,9 +228,9 @@ void kirmesbeleuchtung(uint16_t led_speed, uint16_t iterations, uint16_t space) 
     led_strip_2.show();
     delay(led_speed);
 
-    offset += 1;
-    if (offset > space) {
-      offset = 1;
+    offset -= 1;
+    if (offset < 1) {
+      offset = space;
     }
   }//for
 
@@ -305,21 +305,68 @@ void show_color(uint16_t color_r, uint16_t color_g, uint16_t color_b, uint16_t d
 
 //#######################################
 
-//show claim
-void show_claim(bool claim[2][5][30], uint16_t claim_row, uint16_t color_r, uint16_t color_g, uint16_t color_b,  uint16_t duration){
+//show random sleeves
+void show_random_sleeves(uint16_t iterations, uint16_t duration) {
   uint16_t i;
+  uint16_t k;
+  
+  for(k = 0; k < iterations; k++){
+  int arayI = random(0, 9);
+  uint16_t color_r = adjust_brightness(255 * arrayR[arayI]);
+  uint16_t color_g = adjust_brightness(255 * arrayG[arayI]);
+  uint16_t color_b = adjust_brightness(255 * arrayB[arayI]);
+  
+  for (i = 0; i < NUM_LEDS; i++) {
+    led_strip_1.setPixelColor(i, led_strip_1.Color(color_r, color_g, color_b));
+   
+  }
+    led_strip_1.show();
+   delay(duration);
+ 
+   arayI = random(0, 9);
+   color_r = adjust_brightness(255 * arrayR[arayI]);
+   color_g = adjust_brightness(255 * arrayG[arayI]);
+   color_b = adjust_brightness(255 * arrayB[arayI]);
+   for (i = 0; i < NUM_LEDS; i++) {
+    
+    led_strip_2.setPixelColor(i, led_strip_2.Color(color_r, color_g, color_b));
+  }
+
+  led_strip_2.show();
+  delay(duration);
+  }
+}
+
+//#######################################
+
+//show claim
+void show_claim(bool claim[2][5][30], uint16_t color_r, uint16_t color_g, uint16_t color_b,  uint16_t duration,  uint16_t iterations){
+  uint16_t i;
+  uint16_t j;
+  uint16_t k;
+  
   color_r = adjust_brightness(color_r);
   color_g = adjust_brightness(color_g);
   color_b = adjust_brightness(color_b);
-
-  for (i = 0; i < NUM_LEDS; i++) {
-    led_strip_1.setPixelColor(i, led_strip_1.Color(color_r * claim[0][claim_row][i], color_g * claim[0][claim_row][i], color_b * claim[0][claim_row][i]));
-    led_strip_2.setPixelColor(i, led_strip_2.Color(color_r * claim[1][claim_row][i], color_g * claim[1][claim_row][i], color_b * claim[1][claim_row][i]));
+  for(k = 0; k < iterations; k++){
+    for(j = 0; j < 5; j++){
+      for (i = 0; i < NUM_LEDS; i++) {
+        led_strip_1.setPixelColor(i, led_strip_1.Color(color_r * claim[0][j][i], color_g * claim[0][j][i], color_b * claim[0][j][i]));
+        led_strip_2.setPixelColor(i, led_strip_2.Color(color_r * claim[1][j][i], color_g * claim[1][j][i], color_b * claim[1][j][i]));
+      }
+      led_strip_1.show();
+      led_strip_2.show();
+      delay(duration);
+      for (i = 0; i < NUM_LEDS; i++) {
+        led_strip_1.setPixelColor(i, led_strip_1.Color(0,0,0));
+        led_strip_2.setPixelColor(i, led_strip_2.Color(0,0,0));
+      }
+      led_strip_1.show();
+      led_strip_2.show();
+      delay(duration);
+    }
+   delay(duration * 2); 
   }
-  led_strip_1.show();
-  led_strip_2.show();
-  delay(duration);
-  
 }
 
 //#######################################
