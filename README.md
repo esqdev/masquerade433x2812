@@ -11,4 +11,3 @@ Arduino oder ATMegaXXX der die 433Mhz Signale empfängt, das ensprechende Progra
 ## WebApp
 HTML Webseite die Buttons ausspielt
 - als include für das masterDevice.ino
-- als .html zum offline-testen
