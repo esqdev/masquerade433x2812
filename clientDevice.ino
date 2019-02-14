@@ -43,7 +43,7 @@ int myFavProgram = 12; //8 = Kirmesbeleuchtung
 int triggerProgramId;
 int brightness = 5;
 const int maxProgramId = 12;
-const int brightness_indicator_program = 7;
+//const int brightness_indicator_program = 7;
 int arrayR[10] = {1, 0, 0, 1, 1, 0, 1, 1, 0, 1};
 int arrayG[10] = {0, 1, 0, 1, 0, 1, 1, 0, 1, 1};
 int arrayB[10] = {0, 0, 1, 0, 1, 1, 0, 1, 1, 1};
@@ -141,7 +141,7 @@ void loop() {
       show_color(  0, 255, 255, 1000); // türkis
     }
     if ( 7 == triggerProgramId) {
-      show_color(255, 255, 255, 1000); // weiss
+      show_color(175, 175, 175, 1000); // weiss
     }
     if ( 8 == triggerProgramId) {
       kirmesbeleuchtung(150, 100, 4); // Kirmesbeleuchtung
@@ -173,14 +173,18 @@ void loop() {
       show_random_sleeves(20,   500); // Random Sleeves 
     }
     if (15 == triggerProgramId) { // 
-      show_color(255,   0, 255, 1000); // lila 
+      zweifarben(255,0,0,255,200,150,200, 200, 3); // FC Chaser Neu 
     }
     if (16 == triggerProgramId) { // 
-      show_color(255,   0, 255, 1000); // lila 
+      funkeln(255,   102, 0, 100, 100); // Orangenes Funkeln 
     }
     if (17 == triggerProgramId) { // 
-      show_color(255,   0, 255, 1000); // lila 
+      zweifarben(255,0,0,255,200,150,200, 200, 5); // FC Chaser Neu 
     }
+    if (18 == triggerProgramId) { // 
+      zweifarben(255,0,0,255,200,150,100, 200, 10); // FC Chaser Neu 
+    }
+
 
     all_off(); //switch LEDs off for standby
   } // device IF
@@ -236,7 +240,80 @@ void kirmesbeleuchtung(uint16_t led_speed, uint16_t iterations, uint16_t space) 
 
 }//function
 
+//#######################################
+void funkeln(uint16_t color_r, uint16_t color_g, uint16_t color_b,uint16_t led_speed, uint16_t iterations) {
 
+  color_r = adjust_brightness(color_r);
+  color_g = adjust_brightness(color_g);
+  color_b = adjust_brightness(color_b);
+
+  for (int i = 0; i < iterations; i++) {
+
+      int led_1 = random(0, NUM_LEDS-1);
+      int led_2 = random(0, NUM_LEDS-1);
+
+      led_strip_1.setPixelColor(led_1, led_strip_1.Color(color_r, color_g, color_b));
+      led_strip_2.setPixelColor(led_2, led_strip_2.Color(color_r, color_g, color_b));
+
+      led_strip_1.show();
+      led_strip_2.show();
+      
+      delay(led_speed);
+
+      led_strip_1.setPixelColor(led_1, led_strip_1.Color(0, 0, 0));
+      led_strip_2.setPixelColor(led_2, led_strip_2.Color(0, 0, 0));
+
+      led_strip_1.show();
+      led_strip_2.show();
+
+    
+  }//for iteration
+
+}//function
+
+
+
+
+//#######################################
+void zweifarben(uint16_t color_r1, uint16_t color_g1, uint16_t color_b1,uint16_t color_r2, uint16_t color_g2, uint16_t color_b2, uint16_t led_speed, uint16_t iterations, uint16_t width) {
+
+  int offset = 0;
+  int color_select ;
+  uint16_t colorR, colorG, colorB;
+  for (int i = 0; i < iterations; i++) {
+    
+    for (int j = 0; j < NUM_LEDS; j++) {
+        color_select = ((j + offset ) % (width * 2));
+
+
+         
+      if(color_select < width){
+       colorR = adjust_brightness(color_r1);
+       colorG = adjust_brightness(color_g1);
+       colorB = adjust_brightness(color_b1);
+      }
+      else{
+       colorR = adjust_brightness(color_r2);
+       colorG = adjust_brightness(color_g2);
+       colorB = adjust_brightness(color_b2);
+      }
+
+      led_strip_1.setPixelColor(j, led_strip_1.Color(colorR, colorG, colorB));
+      led_strip_2.setPixelColor(j, led_strip_2.Color(colorR, colorG, colorB));     
+    }
+    led_strip_1.show();
+    led_strip_2.show();
+    delay(led_speed);
+
+
+    
+    offset += 1;
+    if (offset >= width *2 ) {
+      offset = 0;  
+    }
+  }//for
+
+}//function
 
 
 
@@ -410,13 +487,40 @@ void set_myDeviceId() {
 
 //#######################################
 void change_brightness() {
-  brightness += 30;
-  if (brightness > 97) {
+  int brightness_level;
+  if (brightness == 5){
+    brightness = 35;
+    brightness_level = 2;
+  }
+  else if (brightness == 35){
+    brightness = 65;
+    brightness_level = 3;
+  }
+  else if (brightness == 65){
+    brightness = 100;
+    brightness_level = 4;
+  }
+  else if (brightness == 100){
     brightness = 5;
+    brightness_level = 1;
   }
   //Serial.print("Brightness increased: ");
   //Serial.println(brightness);
-  triggerProgramId = brightness_indicator_program;
+  //triggerProgramId = brightness_indicator_program;
+
+  for (int i = 0; i < brightness_level; i++) {
+    led_strip_1.setPixelColor(i, led_strip_1.Color(255, 0, 0));
+    led_strip_2.setPixelColor(i, led_strip_2.Color(255, 0, 0));
+  }
+  led_strip_1.show();
+  led_strip_2.show();
+  delay(1000);
+  for (int i = 0; i < brightness_level; i++) {
+  led_strip_1.setPixelColor(i, led_strip_1.Color(0, 0, 0));
+  led_strip_2.setPixelColor(i, led_strip_2.Color(0, 0, 0));
+  }
+  led_strip_1.show();
+  led_strip_2.show();
 }
 
 
