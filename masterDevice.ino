@@ -51,8 +51,8 @@ void setup()
   server.on("/alle_pegel2019.html",    [](){  execute(42, 13);});
   
   server.on("/alle_randomsleeve.html",    [](){  execute(42, 14);});
-  server.on("/alle_dev15.html",    [](){  execute(42, 15);});
-  server.on("/alle_dev16.html",    [](){  execute(42, 16);});
+  server.on("/alle_paparazzi.html",    [](){  execute(42, 15);});
+  server.on("/alle_funkeln.html",    [](){  execute(42, 16);});
   server.on("/alle_dev17.html",    [](){  execute(42, 17);});
   server.on("/alle_dev18.html",    [](){  execute(42, 18);});
   
