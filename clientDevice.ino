@@ -39,14 +39,15 @@ Adafruit_NeoPixel led_strip_2 = Adafruit_NeoPixel(NUM_LEDS, DATA_LED2, NEO_GRB +
 
 //Variablen
 int myDeviceId;
-int myFavProgram = 12; //8 = Kirmesbeleuchtung
+int myFavProgram1 = 8; //8 = Kirmesbeleuchtung
+int myFavProgram2 = 12; //12 = FC Köln
 int triggerProgramId;
 int brightness = 5;
 const int maxProgramId = 12;
 //const int brightness_indicator_program = 7;
-int arrayR[10] = {1, 0, 0, 1, 1, 0, 1, 1, 0, 1};
-int arrayG[10] = {0, 1, 0, 1, 0, 1, 1, 0, 1, 1};
-int arrayB[10] = {0, 0, 1, 0, 1, 1, 0, 1, 1, 1};
+int arrayR[10] = {255,   0,   0, 255, 255,   0, 255, 255,   0, 175};
+int arrayG[10] = {  0, 255,   0, 255,   0, 255, 255,   0, 255, 175};
+int arrayB[10] = {  0,   0, 255,   0, 255, 255,   0, 255, 255, 175};
 bool claim_pegel_2019[2][5][30] = {{
 {0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,1,0,1,1,1,1,0,1,1,1,0,1,1,1},
 {0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,1,0,1,0,1},
@@ -104,13 +105,13 @@ void loop() {
   //FAV Programm
   button1_state = digitalRead(BUTTON1);
   if (button1_state == LOW) {
-    triggerProgramId = myFavProgram;
+    triggerProgramId = myFavProgram1;
   }
 
   // Zufallsprogramm
   button2_state = digitalRead(BUTTON2);
   if (button2_state == LOW) {
-    triggerProgramId = random(1, maxProgramId + 1);
+    triggerProgramId = myFavProgram2;
   }
 
   // Helligkeit ändern
@@ -147,11 +148,11 @@ void loop() {
       kirmesbeleuchtung(150, 100, 4); // Kirmesbeleuchtung
     }
     if ( 9 == triggerProgramId) { // 3x blitzen
-      show_color(255,   255,   255,   50); 
+      show_color(175,   175,   175,   50); 
       show_color(  0,     0,     0, 1000); 
-      show_color(255,   255,   255,   50); 
+      show_color(175,   175,   175,   50); 
       show_color(  0,     0,     0, 1000); 
-      show_color(255,   255,   255,   50); 
+      show_color(175,   175,   175,   50); 
     }
     if (10 == triggerProgramId) { // Running Rot 5 Pixel
       running_pixels(255,   0,   0, 0,0,0,  100, 5, 2);
@@ -159,12 +160,14 @@ void loop() {
     if (11 == triggerProgramId) {// feuerwerk
       running_pixels(255,   255,   255,0,0,0,  25, 3, 1); 
       show_color(255,   0,   0, 50);
-      show_color(255, 255,   0, 50);    
-      show_color(255, 255, 255, 50);       
+      show_color(255, 255,   0, 50); 
+      show_color(  0, 255, 255, 50);    
+      show_color(175, 175, 175, 50);  
+      show_color(255,   0, 255, 50);      
       show_color(  0,   0, 255, 50);
     }
     if (12 == triggerProgramId) { // fc chaser
-      running_pixels(255,   0,   0, 255,200,150,  100, 30, 5); 
+      zweifarben(255,0,0,255,200,150,100, 300, 8); // FC Chaser Neu 
     }
     if (13 == triggerProgramId) { // claim "pegel 2019" row 1
       show_claim(claim_pegel_2019,  0,255,255,  100, 10);
@@ -173,16 +176,16 @@ void loop() {
       show_random_sleeves(20,   500); // Random Sleeves 
     }
     if (15 == triggerProgramId) { // 
-      zweifarben(255,0,0,255,200,150,200, 200, 3); // FC Chaser Neu 
+      funkeln(255,   255, 255, 50, 200); // weisses Funkeln  (Paparazzi)
     }
     if (16 == triggerProgramId) { // 
-      funkeln(255,   102, 0, 100, 100); // Orangenes Funkeln 
+      funkeln(255,   102, 0, 100, 100); // Orangenes Funkeln  (gemütlich)
     }
     if (17 == triggerProgramId) { // 
-      zweifarben(255,0,0,255,200,150,200, 200, 5); // FC Chaser Neu 
+      
     }
     if (18 == triggerProgramId) { // 
-      zweifarben(255,0,0,255,200,150,100, 200, 10); // FC Chaser Neu 
+      
     }
 
 
@@ -216,9 +219,9 @@ void kirmesbeleuchtung(uint16_t led_speed, uint16_t iterations, uint16_t space) 
 
       if((j + offset) % space == 0){
       int arayI = random(0, 9);
-      uint16_t colorR = adjust_brightness(random(0, 255) * arrayR[arayI]);
-      uint16_t colorG = adjust_brightness(random(0, 255) * arrayG[arayI]);
-      uint16_t colorB = adjust_brightness(random(0, 255) * arrayB[arayI]);
+      uint16_t colorR = adjust_brightness(arrayR[arayI]);
+      uint16_t colorG = adjust_brightness(arrayG[arayI]);
+      uint16_t colorB = adjust_brightness(arrayB[arayI]);
 
       led_strip_1.setPixelColor(j, led_strip_1.Color(colorR, colorG, colorB));
       led_strip_2.setPixelColor(j, led_strip_2.Color(colorR, colorG, colorB));
@@ -277,7 +280,7 @@ void funkeln(uint16_t color_r, uint16_t color_g, uint16_t color_b,uint16_t led_s
 //#######################################
 void zweifarben(uint16_t color_r1, uint16_t color_g1, uint16_t color_b1,uint16_t color_r2, uint16_t color_g2, uint16_t color_b2, uint16_t led_speed, uint16_t iterations, uint16_t width) {
 
-  int offset = 0;
+  int offset = (width *2)-1;
   int color_select ;
   uint16_t colorR, colorG, colorB;
   for (int i = 0; i < iterations; i++) {
@@ -307,9 +310,9 @@ void zweifarben(uint16_t color_r1, uint16_t color_g1, uint16_t color_b1,uint16_t
 
 
     
-    offset += 1;
-    if (offset >= width *2 ) {
-      offset = 0;  
+    offset -= 1;
+    if (offset < 0 ) {
+      offset = (width *2)-1;  
     }
   }//for
 
@@ -389,9 +392,9 @@ void show_random_sleeves(uint16_t iterations, uint16_t duration) {
   
   for(k = 0; k < iterations; k++){
   int arayI = random(0, 9);
-  uint16_t color_r = adjust_brightness(255 * arrayR[arayI]);
-  uint16_t color_g = adjust_brightness(255 * arrayG[arayI]);
-  uint16_t color_b = adjust_brightness(255 * arrayB[arayI]);
+  uint16_t color_r = adjust_brightness(arrayR[arayI]);
+  uint16_t color_g = adjust_brightness(arrayG[arayI]);
+  uint16_t color_b = adjust_brightness(arrayB[arayI]);
   
   for (i = 0; i < NUM_LEDS; i++) {
     led_strip_1.setPixelColor(i, led_strip_1.Color(color_r, color_g, color_b));
