@@ -28,6 +28,7 @@ int button3_state;
 #define LoadPin 8
 #define LoadTime 500
 #define LoadIntervall 4000
+#define IdleBlinkIntervall 2000
 
 //LED Setup
 #define DATA_LED1 10
@@ -39,6 +40,7 @@ Adafruit_NeoPixel led_strip_2 = Adafruit_NeoPixel(NUM_LEDS, DATA_LED2, NEO_GRB +
 
 //Variablen
 int myDeviceId;
+bool idle;
 int myFavProgram1 = 8; //8 = Kirmesbeleuchtung
 int myFavProgram2 = 12; //12 = FC Köln
 int triggerProgramId;
@@ -66,6 +68,8 @@ RH_ASK driver(2000, PIN433);
 uint8_t buf;
 uint8_t buflen;
 long lastLoad = 0;
+long lastIdleBlink = 0;
+
 
 void setup() {
   pinMode(BUTTON1, INPUT_PULLUP);
@@ -85,22 +89,30 @@ void setup() {
 }
 
 void loop() {
+  
+  triggerProgramId = read433();
 
   //Last generieren um Powerbank auszutricksen
   if (millis() > (lastLoad + LoadIntervall)) {
     if (millis() < (lastLoad + LoadTime + LoadIntervall))
     {
       digitalWrite(LoadPin, HIGH);
+      //led_strip_1.setPixelColor(0, led_strip_1.Color(0, 0, 50));
+      //led_strip_1.show();
     } else {
       digitalWrite(LoadPin, LOW);
+      //led_strip_1.setPixelColor(0, led_strip_1.Color(0, 0, 0));
+      //led_strip_1.show();
       lastLoad = millis();
     }
   } else {
     digitalWrite(LoadPin, LOW);
+    //led_strip_1.setPixelColor(0, led_strip_1.Color(0, 0, 0));
+    //led_strip_1.show();
   }
 
 
-  triggerProgramId = read433();
+
 
   //FAV Programm
   button1_state = digitalRead(BUTTON1);
@@ -123,41 +135,42 @@ void loop() {
 
 
   if (triggerProgramId) {
+    all_off();
     if ( 1 == triggerProgramId) {
       show_color(255,   0,   0, 1000); // Rot
     }
-    if ( 2 == triggerProgramId) {
+     if ( 2 == triggerProgramId) {
       show_color(  0, 255,   0, 1000); // grün
     }
-    if ( 3 == triggerProgramId) {
+     if ( 3 == triggerProgramId) {
       show_color(  0,   0, 255, 1000); // blau
     }
-    if ( 4 == triggerProgramId) {
+     if ( 4 == triggerProgramId) {
       show_color(255, 200,   0, 1000); // gelb
     }
-    if ( 5 == triggerProgramId) {
+     if ( 5 == triggerProgramId) {
       show_color(255,   0, 255, 1000); // lila
     }
-    if ( 6 == triggerProgramId) {
+     if ( 6 == triggerProgramId) {
       show_color(  0, 255, 255, 1000); // türkis
     }
-    if ( 7 == triggerProgramId) {
+     if ( 7 == triggerProgramId) {
       show_color(175, 175, 175, 1000); // weiss
     }
-    if ( 8 == triggerProgramId) {
+     if ( 8 == triggerProgramId) {
       kirmesbeleuchtung(150, 100, 4); // Kirmesbeleuchtung
     }
-    if ( 9 == triggerProgramId) { // 3x blitzen
+     if ( 9 == triggerProgramId) { // 3x blitzen
       show_color(175,   175,   175,   50); 
       show_color(  0,     0,     0, 1000); 
       show_color(175,   175,   175,   50); 
       show_color(  0,     0,     0, 1000); 
       show_color(175,   175,   175,   50); 
     }
-    if (10 == triggerProgramId) { // Running Rot 5 Pixel
+     if (10 == triggerProgramId) { // Running Rot 5 Pixel
       running_pixels(255,   0,   0, 0,0,0,  100, 5, 2);
     }
-    if (11 == triggerProgramId) {// feuerwerk
+     if (11 == triggerProgramId) {// feuerwerk
       running_pixels(255,   255,   255,0,0,0,  25, 3, 1); 
       show_color(255,   0,   0, 50);
       show_color(255, 255,   0, 50); 
@@ -166,31 +179,46 @@ void loop() {
       show_color(255,   0, 255, 50);      
       show_color(  0,   0, 255, 50);
     }
-    if (12 == triggerProgramId) { // fc chaser
+     if (12 == triggerProgramId) { // fc chaser
       zweifarben(255,0,0,255,200,150,100, 300, 8); // FC Chaser Neu 
     }
-    if (13 == triggerProgramId) { // claim "pegel 2019" row 1
+     if (13 == triggerProgramId) { // claim "pegel 2019" row 1
       show_claim(claim_pegel_2019,  0,255,255,  100, 10);
     }
-    if (14 == triggerProgramId) { // 
+     if (14 == triggerProgramId) { // 
       show_random_sleeves(20,   500); // Random Sleeves 
     }
-    if (15 == triggerProgramId) { // 
+     if (15 == triggerProgramId) { // 
       funkeln(255,   255, 255, 50, 200); // weisses Funkeln  (Paparazzi)
     }
-    if (16 == triggerProgramId) { // 
+     if (16 == triggerProgramId) { // 
       funkeln(255,   102, 0, 100, 100); // Orangenes Funkeln  (gemütlich)
     }
-    if (17 == triggerProgramId) { // 
+     if (17 == triggerProgramId) { // 
       
     }
-    if (18 == triggerProgramId) { // 
+     if (18 == triggerProgramId) { // 
       
     }
 
 
     all_off(); //switch LEDs off for standby
-  } // device IF
+    
+  } // es gibt eine Programm ID
+  else {  // es gibt keine Programm ID
+
+
+  if (millis() > (lastIdleBlink + IdleBlinkIntervall)) {
+      all_off();
+      idle_show(5,20);
+      lastIdleBlink = millis();
+    }
+  } //else Ohne Programm ID
+
+  
+  
+
+  
 } //loop
 
 //################
@@ -205,6 +233,27 @@ int read433() {
   }
   else
     return (0);
+}
+
+
+// #######################################
+void idle_show(uint16_t pixels, uint16_t brightness){
+
+
+for (int i = 0; i < pixels; i++){
+      int arayI = random(0, 9);
+      uint16_t colorR = round(arrayR[arayI] * brightness / 100);
+      uint16_t colorG = round(arrayG[arayI] * brightness / 100);
+      uint16_t colorB = round(arrayB[arayI] * brightness / 100);
+      
+      int led = random(0, NUM_LEDS-1);
+
+      led_strip_1.setPixelColor(led, led_strip_1.Color(colorR, colorG, colorB));
+      led_strip_2.setPixelColor(led, led_strip_2.Color(colorR, colorG, colorB));
+
+      }
+      led_strip_1.show();
+      led_strip_2.show(); 
 }
 
 
